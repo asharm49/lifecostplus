@@ -1,5 +1,26 @@
 [
   {
+    "name": "Ashburn",
+    "state": "VA",
+    "slug": "ashburn-va",
+    "lat": 35.7796,
+    "lng": -78.6382,
+    "medianIncome": 72000,
+    "monthlyCost": 2150,
+    "avgRent": 1280,
+    "commuteTime": 26,
+    "crimeRate": 320,
+    "amenitiesScore": 78,
+    "scores": {
+      "affordability": 82,
+      "jobs": 74,
+      "commute": 68,
+      "safety": 71,
+      "lifestyle": 80,
+      "overall": 79
+    }
+  },
+  {
     "name": "Raleigh",
     "state": "NC",
     "slug": "raleigh-nc",
