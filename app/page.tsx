@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, MapPin, DollarSign, TrendingUp, Shield } from 'lucide-react';
+import { Search, MapPin, DollarSign, TrendingUp, Shield, GraduationCap } from 'lucide-react';
 import CityCard from '@/components/CityCard';
 import { getCities, filterCities, sortCitiesByPriority } from '@/lib/cities';
 
@@ -36,28 +36,7 @@ export default function Home() {
   const displayCities = sortedCities.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              LifeCost+
-            </Link>
-            <div className="flex gap-6">
-              <Link href="/map" className="text-gray-700 hover:text-blue-600 font-medium">
-                Map View
-              </Link>
-              <Link href="/compare" className="text-gray-700 hover:text-blue-600 font-medium">
-                Compare
-              </Link>
-              <Link href="/methodology" className="text-gray-700 hover:text-blue-600 font-medium">
-                Methodology
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
@@ -129,12 +108,13 @@ export default function Home() {
             <label className="block text-sm font-semibold text-gray-700 mb-3">
               Priority Factors
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {[
                 { id: 'affordability', label: 'Affordability', icon: DollarSign },
                 { id: 'commute', label: 'Commute', icon: MapPin },
                 { id: 'safety', label: 'Safety', icon: Shield },
                 { id: 'lifestyle', label: 'Lifestyle', icon: TrendingUp },
+                { id: 'education', label: 'Education', icon: GraduationCap },
               ].map((priority) => {
                 const Icon = priority.icon;
                 return (
@@ -187,11 +167,7 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-gray-400">
-            Data is aggregated and indicative only. See our{' '}
-            <Link href="/methodology" className="text-blue-400 hover:text-blue-300">
-              methodology
-            </Link>{' '}
-            for details.
+            Data is aggregated and indicative only. See methodology for details.
           </p>
           <p className="text-gray-500 mt-2">© 2024 LifeCost+. All rights reserved.</p>
         </div>

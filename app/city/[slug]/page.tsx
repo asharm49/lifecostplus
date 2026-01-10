@@ -1,12 +1,55 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { ArrowLeft, DollarSign, Home, Car, Utensils, Zap } from 'lucide-react';
+import { ArrowLeft, DollarSign, Home, Car, Utensils, Zap, Info, GraduationCap, MessageSquare } from 'lucide-react';
 import ScoreBar from '@/components/ScoreBar';
 import { getCityBySlug } from '@/lib/cities';
+import { getCityBySlug as getCityById } from '@/lib/locations';
+import { getWeatherByCitySlug, type WeatherData } from '@/lib/weather';
+import { isFeatureEnabled } from '@/lib/feature-flags';
+
+const WeatherCard = dynamic(() => import('@/components/WeatherCard'), {
+  loading: () => <div className="bg-gray-100 rounded-2xl h-64 animate-pulse" />,
+});
+
+const NewsList = dynamic(() => import('@/components/NewsList'), {
+  loading: () => <div className="space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="bg-gray-100 rounded-lg h-32 animate-pulse" />)}</div>,
+});
+
+const EducationList = dynamic(() => import('@/components/EducationList'), {
+  loading: () => <div className="space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="bg-gray-100 rounded-lg h-32 animate-pulse" />)}</div>,
+});
+
+const ForumList = dynamic(() => import('@/components/ForumList'), {
+  loading: () => <div className="space-y-4">{[...Array(5)].map((_, i) => <div key={i} className="bg-gray-100 rounded-lg h-32 animate-pulse" />)}</div>,
+});
+
+type TabType = 'overview' | 'education' | 'forums';
 
 export default function CityDetail({ params }: { params: { slug: string } }) {
   const city = getCityBySlug(params.slug);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [cityId, setCityId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
+
+  useEffect(() => {
+    async function fetchData() {
+      if (city) {
+        if (isFeatureEnabled('weather')) {
+          const weatherData = await getWeatherByCitySlug(city.slug);
+          setWeather(weatherData);
+        }
+
+        const cityData = await getCityById(city.slug);
+        if (cityData) {
+          setCityId(cityData.id);
+        }
+      }
+    }
+    fetchData();
+  }, [city]);
 
   if (!city) {
     return (
@@ -68,9 +111,11 @@ export default function CityDetail({ params }: { params: { slug: string } }) {
               <Link href="/map" className="text-gray-700 hover:text-blue-600 font-medium">
                 Map View
               </Link>
-              <Link href="/compare" className="text-gray-700 hover:text-blue-600 font-medium">
-                Compare
-              </Link>
+              {isFeatureEnabled('compare') && (
+                <Link href="/compare" className="text-gray-700 hover:text-blue-600 font-medium">
+                  Compare
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -115,7 +160,7 @@ export default function CityDetail({ params }: { params: { slug: string } }) {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Monthly Cost Breakdown</h2>
             <div className="space-y-4">
@@ -179,23 +224,98 @@ export default function CityDetail({ params }: { params: { slug: string } }) {
               </div>
             </div>
           </div>
+
+          {isFeatureEnabled('weather') && weather && <WeatherCard weather={weather} />}
         </div>
 
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-lg p-8 mb-8 border-l-4 border-blue-600">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Why This City Works</h2>
-          <p className="text-lg text-gray-700 leading-relaxed">{insight}</p>
+        <div className="bg-white border-b border-gray-200 rounded-t-2xl mb-8">
+          <div className="flex gap-1 px-2 pt-2">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
+                activeTab === 'overview'
+                  ? 'bg-white text-blue-600 border-t-2 border-x-2 border-blue-600 border-b-0'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Info className="w-4 h-4" />
+              Overview
+            </button>
+            {isFeatureEnabled('education') && (
+              <button
+                onClick={() => setActiveTab('education')}
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
+                  activeTab === 'education'
+                    ? 'bg-white text-blue-600 border-t-2 border-x-2 border-blue-600 border-b-0'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4" />
+                Education
+              </button>
+            )}
+            {isFeatureEnabled('forums') && (
+              <button
+                onClick={() => setActiveTab('forums')}
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
+                  activeTab === 'forums'
+                    ? 'bg-white text-blue-600 border-t-2 border-x-2 border-blue-600 border-b-0'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <MessageSquare className="w-4 h-4" />
+                Forums
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Interested in a Comparison?</h2>
-          <p className="text-gray-600 mb-6">Compare this city with another to see detailed differences.</p>
-          <Link
-            href={`/compare?city1=${city.slug}`}
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-          >
-            Compare With Another City
-          </Link>
-        </div>
+        {activeTab === 'overview' && (
+          <>
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-lg p-8 mb-8 border-l-4 border-blue-600">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Why This City Works</h2>
+              <p className="text-lg text-gray-700 leading-relaxed">{insight}</p>
+            </div>
+
+            {isFeatureEnabled('news') && cityId && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest News & Updates</h2>
+                <NewsList locationType="city" locationId={cityId} />
+              </div>
+            )}
+
+            {isFeatureEnabled('compare') && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Interested in a Comparison?</h2>
+                <p className="text-gray-600 mb-6">Compare this city with another to see detailed differences.</p>
+                <Link
+                  href={`/compare?city1=${city.slug}`}
+                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+                >
+                  Compare With Another City
+                </Link>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'education' && cityId && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Schools & Education</h2>
+            <EducationList cityId={cityId} />
+          </div>
+        )}
+
+        {activeTab === 'forums' && cityId && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Community Forums</h2>
+            <ForumList
+              locationId={cityId}
+              locationType="city"
+              locationName={`${city.name}, ${city.state}`}
+            />
+          </div>
+        )}
       </div>
 
       <footer className="bg-gray-900 text-white py-8 mt-16">
